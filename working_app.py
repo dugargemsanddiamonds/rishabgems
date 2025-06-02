@@ -5,106 +5,47 @@ import pandas as pd
 from io import BytesIO
 from pptx import Presentation
 from pptx.util import Pt
-from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+from pptx.enum.text import PP_ALIGN
 import re
-from datetime import datetime, timedelta
-import time
-
-st.set_page_config(
-    page_title="💎 Rishab Gems ‒ Diamond Jewellery Invoice Generator",
-    page_icon="diamond.ico",
-    layout="centered",
-)
-
-with open("app/style.css", encoding="utf-8") as css:
-    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  Helper: Fill PPTX template with invoice data (finding tables by alt_text)
 # ──────────────────────────────────────────────────────────────────────────────
-def generate_filled_invoice(rows, template_path, bill_info, payment_method):
+def generate_filled_invoice(rows, template_path):
+    """
+    1. Opens the PPTX template.
+    2. Finds the "LineItems" table by Name (shape.name) on slide 0, writes data below header.
+    3. Finds the "BillingSummary" table by Name on slide 0, fills Subtotal/Rounding/Net Payable.
+    4. Returns pptx_bytes.
+    """
     prs = Presentation(template_path)
     slide = prs.slides[0]
 
-    # Fill text boxes (titles + values)
-    text_fields = {
-        "Bill No": bill_info.get("Bill No", ""),
-        "Bill Date": bill_info.get("Bill Date", ""),
-        "Due Date": bill_info.get("Due Date", ""),
-        "Biller Name": bill_info.get("Biller Name", ""),
-        "Client Address": bill_info.get("Client Address", ""),
-        "Client Phone Number": bill_info.get("Client Phone Number", ""),
-        "Client Email": bill_info.get("Client Email", ""),
-        "Client Bill To": bill_info.get("Client Bill To", ""),
-    }
-    field_titles = {
-        "Bill No": "Bill No: ",
-        "Bill Date": "Bill Date: ",
-        "Due Date": "Due Date: ",
-        "Biller Name": "Biller Name: ",
-        "Client Bill To": "Bill To: ",
-        "Client Address": "Address: ",
-        "Client Phone Number": "Phone: ",
-        "Client Email": "Email ID: ",
-    }
-    for shape in slide.shapes:
-        if shape.has_text_frame:
-            name = getattr(shape, "name", "")
-            if name in text_fields and name in field_titles:
-                value = str(text_fields[name])
-                if name == "Client Address":
-                    value = value[:65]
-                shape.text_frame.clear()
-                p = shape.text_frame.paragraphs[0]
-                run_title = p.add_run()
-                run_title.text = field_titles[name]
-                run_title.font.bold = True
-                run_title.font.name = "Poppins"
-                run_title.font.size = Pt(12)
-                run_value = p.add_run()
-                run_value.text = value
-                run_value.font.bold = False
-                run_value.font.name = "Poppins"
-                run_value.font.size = Pt(12)
-                shape.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-
-    # Handle Payment Method Checkboxes
-    checkbox_names = {
-        "Cash": "Cash Check",
-        "NEFT / IMPS": "NEFT Check",
-        "UPI": "UPI Check",
-        "Cheque": "Cheque Check",
-    }
-    for shape in slide.shapes:
-        if shape.has_text_frame:
-            name = getattr(shape, "name", "")
-            if name in checkbox_names.values():
-                if name == checkbox_names.get(payment_method):
-                    shape.text = "✔"
-                    # Center align horizontally and vertically
-                    shape.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
-                    shape.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-                    # Optionally set font for tick
-                    for run in shape.text_frame.paragraphs[0].runs:
-                        run.font.name = "Poppins"
-                        run.font.size = Pt(12)  # Adjust size as needed
-                else:
-                    shape.text = ""
-
-    # Fill tables (LineItems and BillingSummary)
+    # 1) Attempt to locate both tables by shape.name
     line_table = None
     summary_table = None
+    found_names = []  # collect for debugging
+
     for shape in slide.shapes:
-        if shape.has_table:
-            if getattr(shape, "name", "") == "LineItems":
-                line_table = shape.table
-            elif getattr(shape, "name", "") == "BillingSummary":
-                summary_table = shape.table
+        if not shape.has_table:
+            continue
+        name = getattr(shape, "name", "")
+        found_names.append(name)
+        if name == "LineItems":
+            line_table = shape.table
+        elif name == "BillingSummary":
+            summary_table = shape.table
 
     if line_table is None or summary_table is None:
-        raise Exception("Could not find LineItems or BillingSummary table in template.")
+        st.error(
+            "❗ Could not find one or both tables by Name (shape.name).\n\n"
+            "Tables found on Slide 1 have these names:\n\n"
+            + "\n".join(f"- '{t}'" for t in found_names)
+            + "\n\nPlease open your PPT template, right-click the correct table → Selection Pane, and set the table's name to exactly 'LineItems' or 'BillingSummary'."
+        )
+        st.stop()
 
-    # Get font style from first data cell
+    # 2) Grab Poppins 12 pt styling from row 1, col 0 (first blank row)
     max_rows = len(line_table.rows)
     if max_rows > 1:
         sample_cell = line_table.rows[1].cells[0]
@@ -119,7 +60,7 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
         base_font_name = "Poppins"
         base_font_size = Pt(12)
 
-    # Clear existing data rows (rows 1…end), leave row 0 intact
+    # 3) Clear existing data rows (rows 1…end), leave row 0 intact
     available_data_rows = max_rows - 1
     for r_idx in range(1, max_rows):
         for c_idx in range(len(line_table.columns)):
@@ -129,9 +70,9 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
             run = para.add_run()
             run.font.name = base_font_name
             run.font.size = base_font_size
-            para.alignment = PP_ALIGN.CENTER
+            para.alignment = PP_ALIGN.CENTER  # Center align
 
-    # Write each data row into rows 1…up to available_data_rows
+    # 4) Write each data row into rows 1…up to available_data_rows
     rows_to_fill = min(len(rows), available_data_rows)
     for i in range(rows_to_fill):
         row_data = rows[i]
@@ -139,15 +80,7 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
         for col_idx, key in enumerate(
             ["No.", "Item Description", "Weight", "Rate (₹)", "Amount (₹)"]
         ):
-            value = row_data.get(key, "")
-            if key == "Amount (₹)":
-                try:
-                    amount_val = float(value)
-                    txt = f"{amount_val:,.2f}"
-                except Exception:
-                    txt = str(value)
-            else:
-                txt = str(value) if value is not None else ""
+            txt = str(row_data.get(key, "")) if row_data.get(key) is not None else ""
             cell = target_row.cells[col_idx]
             cell.text = ""
             para = cell.text_frame.paragraphs[0]
@@ -155,9 +88,9 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
             run.text = txt
             run.font.name = base_font_name
             run.font.size = base_font_size
-            para.alignment = PP_ALIGN.CENTER
+            para.alignment = PP_ALIGN.CENTER  # Center align
 
-    # Compute Subtotal, Rounding, Net Payable
+    # 5) Compute Subtotal, Rounding, Net Payable
     amounts = []
     for row_data in rows:
         amt = pd.to_numeric(row_data.get("Amount (₹)", 0), errors="coerce")
@@ -169,22 +102,22 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
     rounding_value = rounded_total - subtotal
     net_payable = rounded_total
 
-    # Fill BillingSummary table (row 1: Subtotal, row 2: Rounding, row 3: NET PAYABLE)
-    def set_summary_cell(r_idx, value, prefix=""):
+    # 6) Fill BillingSummary table (row 1: Subtotal, row 2: Rounding, row 3: NET PAYABLE)
+    def set_summary_cell(r_idx, value):
         cell = summary_table.rows[r_idx].cells[1]
         cell.text = ""
         para = cell.text_frame.paragraphs[0]
         run = para.add_run()
-        run.text = f"{prefix}{value:,.2f}"
+        run.text = f"{value:,.2f}"
         run.font.name = base_font_name
         run.font.size = base_font_size
-        para.alignment = PP_ALIGN.CENTER
+        para.alignment = PP_ALIGN.CENTER  # Center align
 
     set_summary_cell(1, subtotal)
     set_summary_cell(2, rounding_value)
-    set_summary_cell(3, net_payable, prefix="₹ ")
+    set_summary_cell(3, net_payable)
 
-    # Save PPTX to memory
+    # 7) Save PPTX to memory
     out = BytesIO()
     prs.save(out)
     return out.getvalue()
@@ -208,14 +141,11 @@ def parse_number(val):
         raise ValueError("Empty value")
     return float(s)
 
-@st.cache_data
-def slow_function():
-    import time
-    time.sleep(2)  # Simulating a slow operation
-    return "Result from slow_function"
-
 def main():
-    # Add this at the top of your main() function, after st.set_page_config(...)
+    st.set_page_config(
+        page_title="💎 Rishab Gems ‒ Diamond Jewellery Invoice Generator",
+        layout="wide",
+    )
 
     st.title("💎 Rishab Gems ‒ Diamond Jewellery Invoice Generator")
     st.markdown(
@@ -223,67 +153,6 @@ def main():
         Fill in your invoice line items below. Press “➕ Add Another Row” to append more rows.
         Once you’re done, click **Generate Invoice** to download a fully-filled PowerPoint (.pptx).
         """
-    )
-
-    # ── NEW: Bill Info Section ──
-    today = datetime.today().date()
-    default_due = today + timedelta(days=7)
-
-    # Generate Bill No: e.g. RG-20240601-001
-    if "bill_no" not in st.session_state:
-        st.session_state.bill_no = f"RG-{today.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
-
-    bill_no = st.session_state.bill_no
-    bill_date = st.date_input("Bill Date", value=today, key="bill_date")
-    due_date = st.date_input("Due Date", value=default_due, key="due_date")
-    biller_name = st.text_input("Biller Name", value="Mr. Manish Dugar", key="biller_name")
-
-    st.markdown(f"**Invoice Number:** `{bill_no}`")
-
-    # ── NEW: Client Info Section ──
-    st.markdown("### Client Information")
-    client_address = st.text_input(
-        "Client Address (max 65 characters)",
-        value="",
-        max_chars=65,
-        placeholder="Enter client address",
-        key="client_address",
-    )
-    client_phone = st.text_input(
-        "Client Phone Number",
-        value="",
-        placeholder="Enter client phone number",
-        key="client_phone",
-    )
-    client_email = st.text_input(
-        "Client Email",
-        value="",
-        placeholder="Enter client email",
-        key="client_email",
-    )
-    client_bill_to = st.text_input(
-        "Client Bill To",
-        value="",
-        placeholder="Enter client billing name",
-        key="client_bill_to",
-    )
-
-    # ── NEW: Payment Method Section ──
-    st.markdown("### Payment Method")
-    payment_method = st.radio(
-        "Select Payment Method:",
-        options=["Cash", "NEFT / IMPS", "UPI", "Cheque"],
-        index=0,  # Default to "Cash"
-        key="payment_method",
-    )
-
-    # ── NEW: Weight Unit ──
-    st.markdown("### Weight Unit")
-    weight_unit = st.radio(
-        "Select Weight Unit:",
-        options=["carats", "gms"],
-        index=0,  # Default to carats
-        key="weight_unit",
     )
 
     # Initialize session-state rows
@@ -296,78 +165,105 @@ def main():
 
     st.markdown("---")
 
-    # Always use vertical card per line item, with label above each input (responsive & clear)
-    for idx in range(len(rows)):
-        with st.container():
-            st.markdown(f"**Line Item {idx+1}**")
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("No. (positive integer)")
-            with c2:
-                no_val = st.text_input(
-                    label="No. (positive integer)",
-                    value=rows[idx]["No."],
-                    placeholder="1",
-                    key=f"No_{idx}",
-                    label_visibility="collapsed",
-                )
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Item Description (required)")
-            with c2:
-                desc_val = st.text_input(
-                    label="Item Description (required)",
-                    value=rows[idx]["Item Description"],
-                    placeholder="Diamond Ring, Necklace…",
-                    key=f"Desc_{idx}",
-                    label_visibility="collapsed",
-                )
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Weight  (non-negative)")
-            with c2:
-                weight_val = st.text_input(
-                    label="Weight  (non-negative)",
-                    value=rows[idx]["Weight"],
-                    placeholder="e.g. 1.25",
-                    key=f"Weight_{idx}",
-                    label_visibility="collapsed",
-                )
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Rate (₹) (non-negative)")
-            with c2:
-                rate_val = st.text_input(
-                    label="Rate (₹) (non-negative)",
-                    value=rows[idx]["Rate (₹)"],
-                    placeholder="e.g. 45000",
-                    key=f"Rate_{idx}",
-                    label_visibility="collapsed",
-                )
-            # --- Auto-calculate Amount ---
-            try:
-                w = float(weight_val)
-                r = float(rate_val)
-                auto_amount = f"{w * r:.2f}"
-            except Exception:
-                auto_amount = ""
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Amount (₹) (auto, editable)")
-            with c2:
-                amount_val = st.text_input(
-                    label="Amount (₹) (auto, editable)",
-                    value=rows[idx]["Amount (₹)"] if rows[idx]["Amount (₹)"] else auto_amount,
-                    placeholder=auto_amount,
-                    key=f"Amount_{idx}",
-                    label_visibility="collapsed",
-                )
-            # Save back to session state
+    # Responsive UI: Use vertical cards on mobile, horizontal rows on desktop
+    is_mobile = st.session_state.get("_is_mobile", None)
+    if is_mobile is None:
+        # Simple user-agent check (Streamlit doesn't expose directly, so use a hack)
+        is_mobile = st.query_params().get("mobile", ["0"])[0] == "1"
+        st.session_state["_is_mobile"] = is_mobile
+
+    if not is_mobile:
+        # Desktop: horizontal row layout
+        # Header labels (not inputs)
+        header_cols = st.columns([1, 3, 2, 2, 2])
+        header_cols[0].markdown("**No.**")
+        header_cols[1].markdown("**Item Description**")
+        header_cols[2].markdown("**Weight (gm)**")
+        header_cols[3].markdown("**Rate (₹)**")
+        header_cols[4].markdown("**Amount (₹)**")
+
+        for idx in range(len(rows)):
+            c1, c2, c3, c4, c5 = st.columns([1, 3, 2, 2, 2], gap="small")
+            no_val = c1.text_input(
+                label="No.",
+                value=rows[idx]["No."],
+                placeholder="1",
+                key=f"No_{idx}",
+                label_visibility="collapsed",
+            )
+            desc_val = c2.text_input(
+                label="Item Description",
+                value=rows[idx]["Item Description"],
+                placeholder="Diamond Ring, Necklace…",
+                key=f"Desc_{idx}",
+                label_visibility="collapsed",
+            )
+            weight_val = c3.text_input(
+                label="Weight (gm)",
+                value=rows[idx]["Weight"],
+                placeholder="e.g. 1.25",
+                key=f"Weight_{idx}",
+                label_visibility="collapsed",
+            )
+            rate_val = c4.text_input(
+                label="Rate (₹)",
+                value=rows[idx]["Rate (₹)"],
+                placeholder="e.g. 45000",
+                key=f"Rate_{idx}",
+                label_visibility="collapsed",
+            )
+            amount_val = c5.text_input(
+                label="Amount (₹)",
+                value=rows[idx]["Amount (₹)"],
+                placeholder="e.g. 56250",
+                key=f"Amount_{idx}",
+                label_visibility="collapsed",
+            )
             st.session_state.rows[idx]["No."] = no_val
             st.session_state.rows[idx]["Item Description"] = desc_val
             st.session_state.rows[idx]["Weight"] = weight_val
             st.session_state.rows[idx]["Rate (₹)"] = rate_val
             st.session_state.rows[idx]["Amount (₹)"] = amount_val
+    else:
+        # Mobile: vertical card per line item
+        for idx in range(len(rows)):
+            with st.container():
+                st.markdown(f"**Line Item {idx+1}**")
+                no_val = st.text_input(
+                    label="No. (positive integer)",
+                    value=rows[idx]["No."],
+                    placeholder="1",
+                    key=f"No_{idx}",
+                )
+                desc_val = st.text_input(
+                    label="Item Description (required)",
+                    value=rows[idx]["Item Description"],
+                    placeholder="Diamond Ring, Necklace…",
+                    key=f"Desc_{idx}",
+                )
+                weight_val = st.text_input(
+                    label="Weight (gm) (non-negative)",
+                    value=rows[idx]["Weight"],
+                    placeholder="e.g. 1.25",
+                    key=f"Weight_{idx}",
+                )
+                rate_val = st.text_input(
+                    label="Rate (₹) (non-negative)",
+                    value=rows[idx]["Rate (₹)"],
+                    placeholder="e.g. 45000",
+                    key=f"Rate_{idx}",
+                )
+                amount_val = st.text_input(
+                    label="Amount (₹) (non-negative, auto if blank)",
+                    value=rows[idx]["Amount (₹)"],
+                    placeholder="e.g. 56250",
+                    key=f"Amount_{idx}",
+                )
+                st.session_state.rows[idx]["No."] = no_val
+                st.session_state.rows[idx]["Item Description"] = desc_val
+                st.session_state.rows[idx]["Weight"] = weight_val
+                st.session_state.rows[idx]["Rate (₹)"] = rate_val
+                st.session_state.rows[idx]["Amount (₹)"] = amount_val
 
     st.markdown("---")
 
@@ -455,7 +351,7 @@ def main():
                     {
                         "No.": str(int(parse_number(r["No."]))),
                         "Item Description": r["Item Description"].strip(),
-                        "Weight": f"{parse_number(r['Weight']):.2f} {weight_unit}",
+                        "Weight": f"{parse_number(r['Weight']):.2f}",
                         "Rate (₹)": f"{parse_number(r['Rate (₹)']):.2f}",
                         "Amount (₹)": f"{amt:.2f}",
                     }
@@ -471,25 +367,11 @@ def main():
         validated.sort(key=lambda x: int(x["No."]))
 
         # 4) Generate PPTX
-        bill_info = {
-            "Bill No": bill_no,
-            "Bill Date": bill_date.strftime("%d-%m-%Y"),
-            "Due Date": due_date.strftime("%d-%m-%Y"),
-            "Biller Name": biller_name,
-            "Client Address": client_address,
-            "Client Phone Number": client_phone,
-            "Client Email": client_email,
-            "Client Bill To": client_bill_to,
-        }
         try:
-            pptx_bytes = generate_filled_invoice(validated, "invoice_template.pptx", bill_info, payment_method)
+            pptx_bytes = generate_filled_invoice(validated, "invoice_template.pptx")
         except Exception as e:
             st.error(f"Unexpected error during PPT generation: {e}")
             return
-
-        # Generate a dynamic filename
-        filename = f"RishabGems_{bill_no}_{client_bill_to}_{client_phone}_{today.strftime('%Y%m%d')}.pptx"
-        filename = re.sub(r'[\\/*?:"<>|]', "", filename)  # Remove invalid characters for filenames
 
         # 5) Download button for PPTX
         if pptx_bytes:
@@ -497,7 +379,7 @@ def main():
             st.download_button(
                 label="📥 Download Filled PPTX",
                 data=pptx_bytes,
-                file_name=filename,
+                file_name="RishabGems_Invoice_Filled.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
             )
 
