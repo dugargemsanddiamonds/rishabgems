@@ -34,10 +34,9 @@
     color: #2C2926 !important;
 }
 
-/* 6. Inputs, textareas, buttons, radio options */
+/* 6. Inputs, textareas, radio options (no background for input/select/textarea) */
 .stApp input,
 .stApp textarea,
-.stApp button,
 .stApp select,
 .stApp .stRadio label,
 .stApp .stDownloadButton > button {
@@ -52,9 +51,33 @@
     color: #2C2926 !important;
 }
 
+/* Remove background from .stApp and use a fixed full-viewport div for background image */
+.stApp {
+    background: white !important;
+    position: relative;
+}
+
+/* Add a fixed background image div using Streamlit's main container */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 15;
+    background: url('https://raw.githubusercontent.com/dugargemsanddiamonds/rishabgems/refs/heads/main/app/background-image.gif') no-repeat center center fixed;
+    background-size: cover;
+    opacity: 0.17; /* Adjust for desired transparency */
+    pointer-events: none;
+}
+
+/* Ensure app content is above the background */
+.stApp > * {
+    position: fixed;
+    z-index: 10;
+}
+
 /* Buttons */
 .stButton > button, .stDownloadButton > button {
-    background: linear-gradient(90deg, #DA9B49 0%, #F3E38A 99%) !important;
+    background: linear-gradient(90deg, #DA9B49 0%, #F3E38A) !important;
     color: #2C2926 !important;
     border: none !important;
     border-radius: 8px !important;
@@ -62,10 +85,34 @@
     font-size: 15px !important;
     font-weight: 700 !important;
     padding: 0.5em 2em !important;
-    box-shadow: 0 2px 8px rgba(218,155,73,0.15);
+    box-shadow: 0 2px 8px rgba(218,155,73,0.10);
     transition: 0.2s;
 }
 .stButton > button:hover, .stDownloadButton > button:hover {
     filter: brightness(0.95);
     box-shadow: 0 4px 16px rgba(218,155,73,0.25);
+}
+
+/* Gradient background for text input, textarea, and select boxes */
+.stApp input[type="text"],
+.stApp textarea,
+.stApp select {
+    background: linear-gradient(90deg, #fffbe7 0%, #f7f6ef 100%) !important;
+    border: 1.5px solid #e2c98a !important;
+    border-radius: 6px !important;
+    color: #2C2926 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 1px 4px rgba(218,155,73,0.07);
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* Optional: On focus, make border more prominent */
+.stApp input[type="text"]:focus,
+.stApp textarea:focus,
+.stApp select:focus {
+    border: 2px solid #DA9B49 !important;
+    outline: none !important;
+    box-shadow: 0 2px 8px rgba(218,155,73,0.15);
 }

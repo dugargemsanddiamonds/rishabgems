@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import time
 
 st.set_page_config(
-    page_title="💎 Rishab Gems ‒ Diamond Jewellery Invoice Generator",
+    page_title="Rishab Gems 💎",
     page_icon="diamond.ico",
     layout="centered",
 )
@@ -217,11 +217,12 @@ def slow_function():
 def main():
     # Add this at the top of your main() function, after st.set_page_config(...)
 
-    st.title("💎 Rishab Gems ‒ Diamond Jewellery Invoice Generator")
+    st.title("Rishab Gems 💎 ‒ Invoice Generator")
     st.markdown(
         """
-        Fill in your invoice line items below. Press “➕ Add Another Row” to append more rows.
+        Fill in your invoice line items below. Press **Add Another Row** to append more rows.
         Once you’re done, click **Generate Invoice** to download a fully-filled PowerPoint (.pptx).
+        As soon as PPT is opened it can be shared by clicking on top right corner > 3 dots > Share as PDF > WhatsApp.
         """
     )
 
