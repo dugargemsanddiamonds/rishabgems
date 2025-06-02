@@ -8,7 +8,7 @@ st.set_page_config(
 )
 page_element="""
 <style>
-[data-testid="stHeader"]{
+[data-testid="stHeader"] {
   background-color: rgba(0,0,0,0);
 }
 </style>
@@ -305,43 +305,59 @@ def main():
     if "bill_no" not in st.session_state:
         st.session_state["bill_no"] = f"RG-{today.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
 
+    # Use markdown for bold labels above each input
+    st.markdown("**Invoice Number**")
     bill_no = st.text_input(
-        "Invoice Number",
+        label="Invoice Number",
         key="bill_no",
+        label_visibility="collapsed",
     )
 
-    bill_date = st.date_input("Bill Date", value=today, key="bill_date")
-    due_date = st.date_input("Due Date", value=default_due, key="due_date")
-    biller_name = st.text_input("Biller Name", value="Mr. Manish Dugar", key="biller_name")
+    st.markdown("**Bill Date**")
+    bill_date = st.date_input("Bill Date", value=today, key="bill_date", label_visibility="collapsed")
+
+    st.markdown("**Due Date**")
+    due_date = st.date_input("Due Date", value=default_due, key="due_date", label_visibility="collapsed")
+
+    st.markdown("**Biller Name**")
+    biller_name = st.text_input("Biller Name", value="Mr. Manish Dugar", key="biller_name", label_visibility="collapsed")
 
     # st.markdown(f"**Invoice Number:** `{bill_no}`")
 
     # ── NEW: Client Info Section ──
     st.markdown("### Client Information")
+    st.markdown("**Client Bill To**")
+    client_bill_to = st.text_input(
+        "Client Bill To",
+        value="",
+        placeholder="Enter client billing name",
+        key="client_bill_to",
+        label_visibility="collapsed",
+    )
+    st.markdown("**Client Email**")
+    client_email = st.text_input(
+        "Client Email",
+        value="",
+        placeholder="Enter client email",
+        key="client_email",
+        label_visibility="collapsed",
+    )
+    st.markdown("**Client Phone Number**")
+    client_phone = st.text_input(
+        "Client Phone Number",
+        value="",
+        placeholder="Enter client phone number",
+        key="client_phone",
+        label_visibility="collapsed",
+    )
+    st.markdown("**Client Address (max 65 characters)**")
     client_address = st.text_input(
         "Client Address (max 65 characters)",
         value="",
         max_chars=65,
         placeholder="Enter client address",
         key="client_address",
-    )
-    client_phone = st.text_input(
-        "Client Phone Number",
-        value="",
-        placeholder="Enter client phone number",
-        key="client_phone",
-    )
-    client_email = st.text_input(
-        "Client Email",
-        value="",
-        placeholder="Enter client email",
-        key="client_email",
-    )
-    client_bill_to = st.text_input(
-        "Client Bill To",
-        value="",
-        placeholder="Enter client billing name",
-        key="client_bill_to",
+        label_visibility="collapsed",
     )
 
     # ── NEW: Payment Method Section ──
