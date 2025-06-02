@@ -235,9 +235,53 @@ def slow_function():
     return "Result from slow_function"
 
 def main():
-    # Add this at the top of your main() function, after st.set_page_config(...)
+    # --- Minimalistic Login ---
+    CORRECT_PIN = st.secrets.get("login_pin", "123456")
+    if not st.session_state.get("authenticated"):
+                # Centered logo above login
+        st.markdown(
+            """
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
+                <img src="https://raw.githubusercontent.com/kingrishabdugar/RishabGems/744b262046e8c3152c21e4430da6ca59fd752e70/logo.png" width="80" style="border-radius:12px; box-shadow:0 2px 8px 0 rgba(0,0,0,0.06);" />
+            </div>
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom:0.5rem;">
+                <img src="https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/image%20(1).png" width="50" style="margin-right: 0.5rem;" />
+                <h1 style="margin: 0; padding: 0;">Login</h1>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        with open("app/style.css") as css:
+            st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+        pin = st.text_input(
+            "",
+            type="password",
+            max_chars=6,
+            key="pin",
+            placeholder="_ _ _ _ _ _",
+            label_visibility="collapsed",
+            help="Enter your 6-digit PIN",
+        )
+        if st.button("Login", use_container_width=True):
+            if pin == CORRECT_PIN:
+                st.session_state["authenticated"] = True
+                st.rerun()
+            else:
+                st.error("Incorrect PIN. Please try again.")
+        return  # Stop here if not authenticated
 
-    st.title("Rishab Gems ‒ Invoice Generator")
+    # --- Your existing app code below ---
+    
+    st.markdown(
+        """
+        <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom:0.5rem;">
+            <img src="https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/twindiamond.png" width="75" style="margin-right: 0.5rem;" />
+            <h1 style="margin: 0; padding: 0;">Rishab Gems‒Invoice Generator</h1>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.markdown(
         """
         * Fill in your invoice line items below. Press **Add Another Row** to append more rows.
