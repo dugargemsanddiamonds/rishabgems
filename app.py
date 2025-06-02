@@ -16,7 +16,7 @@ st.set_page_config(
     layout="centered",
 )
 
-with open("app/style.css", encoding="utf-8") as css:
+with open("app/style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -231,14 +231,18 @@ def main():
 
     # Generate Bill No: e.g. RG-20240601-001
     if "bill_no" not in st.session_state:
-        st.session_state.bill_no = f"RG-{today.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
+        st.session_state["bill_no"] = f"RG-{today.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
 
-    bill_no = st.session_state.bill_no
+    bill_no = st.text_input(
+        "Invoice Number",
+        key="bill_no",
+    )
+
     bill_date = st.date_input("Bill Date", value=today, key="bill_date")
     due_date = st.date_input("Due Date", value=default_due, key="due_date")
     biller_name = st.text_input("Biller Name", value="Mr. Manish Dugar", key="biller_name")
 
-    st.markdown(f"**Invoice Number:** `{bill_no}`")
+    # st.markdown(f"**Invoice Number:** `{bill_no}`")
 
     # ── NEW: Client Info Section ──
     st.markdown("### Client Information")
@@ -270,10 +274,13 @@ def main():
 
     # ── NEW: Payment Method Section ──
     st.markdown("### Payment Method")
+    if "payment_method" not in st.session_state:
+        st.session_state["payment_method"] = "Cash"
+
     payment_method = st.radio(
         "Select Payment Method:",
         options=["Cash", "NEFT / IMPS", "UPI", "Cheque"],
-        index=0,  # Default to "Cash"
+        index=0,
         key="payment_method",
     )
 
@@ -304,10 +311,12 @@ def main():
             with c1:
                 st.markdown("No. (positive integer)")
             with c2:
+                # Autofill No. as idx+1 if empty, else use existing value
+                default_no = rows[idx]["No."] if rows[idx]["No."] else str(idx + 1)
                 no_val = st.text_input(
                     label="No. (positive integer)",
-                    value=rows[idx]["No."],
-                    placeholder="1",
+                    value=default_no,
+                    placeholder=str(idx + 1),
                     key=f"No_{idx}",
                     label_visibility="collapsed",
                 )
@@ -371,8 +380,9 @@ def main():
 
     st.markdown("---")
 
-    col_a, col_b = st.columns([1, 1])
-    with col_a:
+    # Centered, stacked buttons
+    center_col = st.columns([3, 2, 3])[1]
+    with center_col:
         if st.button("➕ Add Another Row"):
             st.session_state.rows.append(
                 {
@@ -384,8 +394,7 @@ def main():
                 }
             )
             st.rerun()
-
-    with col_b:
+        st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)  # Small vertical gap
         generate_button = st.button("🖨️ Generate Invoice")
 
     # When “Generate Invoice” is clicked:
