@@ -9,6 +9,10 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 import re
 from datetime import datetime, timedelta
 import time
+import importlib.util
+
+# Import num2words from number-to-words.py
+from number_to_words import num2words
 
 st.set_page_config(
     page_title="Rishab Gems 💎",
@@ -22,7 +26,7 @@ with open("app/style.css") as css:
 # ──────────────────────────────────────────────────────────────────────────────
 #  Helper: Fill PPTX template with invoice data (finding tables by alt_text)
 # ──────────────────────────────────────────────────────────────────────────────
-def generate_filled_invoice(rows, template_path, bill_info, payment_method):
+def generate_filled_invoice(rows, template_path, bill_info, payment_method, amount_in_words):
     prs = Presentation(template_path)
     slide = prs.slides[0]
 
@@ -169,6 +173,9 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
     rounding_value = rounded_total - subtotal
     net_payable = rounded_total
 
+    # Get amount in words
+    amount_in_words = "Rupees " + num2words(net_payable) + " Only."
+
     # Fill BillingSummary table (row 1: Subtotal, row 2: Rounding, row 3: NET PAYABLE)
     def set_summary_cell(r_idx, value, prefix=""):
         cell = summary_table.rows[r_idx].cells[1]
@@ -183,6 +190,19 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method):
     set_summary_cell(1, subtotal)
     set_summary_cell(2, rounding_value)
     set_summary_cell(3, net_payable, prefix="₹ ")
+
+    # Write Amount In Words to the selection pane text box
+    for shape in slide.shapes:
+        if shape.has_text_frame and getattr(shape, "name", "") == "Amount In Words":
+            shape.text_frame.clear()
+            p = shape.text_frame.paragraphs[0]
+            run = p.add_run()
+            run.text = amount_in_words
+            run.font.name = "Poppins"
+            run.font.size = Pt(11)
+            run.font.italic = True
+            p.alignment = PP_ALIGN.CENTER  # Optional: center align text
+            shape.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
 
     # Save PPTX to memory
     out = BytesIO()
@@ -217,12 +237,12 @@ def slow_function():
 def main():
     # Add this at the top of your main() function, after st.set_page_config(...)
 
-    st.title("Rishab Gems 💎 ‒ Invoice Generator")
+    st.title("Rishab Gems ‒ Invoice Generator")
     st.markdown(
         """
-        Fill in your invoice line items below. Press **Add Another Row** to append more rows.
-        Once you’re done, click **Generate Invoice** to download a fully-filled PowerPoint (.pptx).
-        As soon as PPT is opened it can be shared by clicking on top right corner > 3 dots > Share as PDF > WhatsApp.
+        * Fill in your invoice line items below. Press **Add Another Row** to append more rows.
+        * Once you’re done, click **Generate Invoice** to download a fully-filled PowerPoint (.pptx).
+        * As soon as PPT is opened it can be shared by clicking on top right corner > 3 dots > Share as PDF > WhatsApp.
         """
     )
 
@@ -361,17 +381,23 @@ def main():
                 auto_amount = f"{w * r:.2f}"
             except Exception:
                 auto_amount = ""
+
+            # Always auto-calculate and overwrite Amount (₹)
+            amount_val = auto_amount
+
             c1, c2 = st.columns([1, 5], gap="small")
             with c1:
-                st.markdown("Amount (₹) (auto, editable)")
+                st.markdown("Amount (₹) (auto-calculated)")
             with c2:
-                amount_val = st.text_input(
-                    label="Amount (₹) (auto, editable)",
-                    value=rows[idx]["Amount (₹)"] if rows[idx]["Amount (₹)"] else auto_amount,
+                st.text_input(
+                    label="Amount (₹) (auto-calculated)",
+                    value=amount_val,
                     placeholder=auto_amount,
                     key=f"Amount_{idx}",
                     label_visibility="collapsed",
+                    disabled=False,  # Make it read-only
                 )
+
             # Save back to session state
             st.session_state.rows[idx]["No."] = no_val
             st.session_state.rows[idx]["Item Description"] = desc_val
@@ -491,8 +517,27 @@ def main():
             "Client Email": client_email,
             "Client Bill To": client_bill_to,
         }
+
+        # Calculate net_payable (same as in generate_filled_invoice)
+        amounts = [float(x["Amount (₹)"]) for x in validated]
+        subtotal = sum(amounts)
+        net_payable = float(round(subtotal))
+
+        # Get amount in words
+        amount_in_words = "Rupees " + num2words(net_payable) + " Only."
+
+        # Show Amount In Words textbox in UI (editable)
+        amount_in_words = st.text_input(
+            "Amount In Words",
+            value=amount_in_words,
+            key="amount_in_words",
+            help="Amount in words for the invoice. You can edit if needed.",
+        )
+
         try:
-            pptx_bytes = generate_filled_invoice(validated, "invoice_template.pptx", bill_info, payment_method)
+            pptx_bytes = generate_filled_invoice(
+                validated, "invoice_template.pptx", bill_info, payment_method, amount_in_words
+            )
         except Exception as e:
             st.error(f"Unexpected error during PPT generation: {e}")
             return
