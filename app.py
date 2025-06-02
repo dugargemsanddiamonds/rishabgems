@@ -1,6 +1,19 @@
 # app.py
 
 import streamlit as st
+st.set_page_config(
+    page_title="Rishab Gems 💎",
+    page_icon="diamond.ico",
+    layout="centered",
+)
+page_element="""
+<style>
+[data-testid="stHeader"]{
+  background-color: rgba(0,0,0,0);
+}
+</style>
+"""
+st.markdown(page_element, unsafe_allow_html=True)
 import pandas as pd
 from io import BytesIO
 from pptx import Presentation
@@ -13,12 +26,6 @@ import importlib.util
 
 # Import num2words from number-to-words.py
 from number_to_words import num2words
-
-st.set_page_config(
-    page_title="Rishab Gems 💎",
-    page_icon="diamond.ico",
-    layout="centered",
-)
 
 with open("app/style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
@@ -254,12 +261,12 @@ def main():
         with open("app/style.css") as css:
             st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
         pin = st.text_input(
-            "",
+            "PIN",  # Non-empty label for accessibility
             type="password",
             max_chars=6,
             key="pin",
             placeholder="_ _ _ _ _ _",
-            label_visibility="collapsed",
+            label_visibility="collapsed",  # Hides it visually
             help="Enter your 6-digit PIN",
         )
         if st.button("Login", use_container_width=True):
