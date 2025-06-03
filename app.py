@@ -306,27 +306,28 @@ def main():
         st.session_state["bill_no"] = f"RG-{today.strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')}"
 
     # Use markdown for bold labels above each input
-    st.markdown("**Invoice Number**")
+    st.markdown('<div class="subheading">Invoice Number</div>', unsafe_allow_html=True)
     bill_no = st.text_input(
         label="Invoice Number",
         key="bill_no",
         label_visibility="collapsed",
     )
 
-    st.markdown("**Bill Date**")
+    st.markdown('<div class="subheading">Bill Date</div>', unsafe_allow_html=True)
     bill_date = st.date_input("Bill Date", value=today, key="bill_date", label_visibility="collapsed")
 
-    st.markdown("**Due Date**")
+    st.markdown('<div class="subheading">Due Date</div>', unsafe_allow_html=True)
     due_date = st.date_input("Due Date", value=default_due, key="due_date", label_visibility="collapsed")
 
-    st.markdown("**Biller Name**")
+    st.markdown('<div class="subheading">Biller Name</div>', unsafe_allow_html=True)
     biller_name = st.text_input("Biller Name", value="Mr. Manish Dugar", key="biller_name", label_visibility="collapsed")
 
     # st.markdown(f"**Invoice Number:** `{bill_no}`")
 
     # ── NEW: Client Info Section ──
-    st.markdown("### Client Information")
-    st.markdown("**Client Bill To**")
+    st.markdown('<div class="heading">Client Information</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="subheading">Client Bill To</div>', unsafe_allow_html=True)
     client_bill_to = st.text_input(
         "Client Bill To",
         value="",
@@ -334,7 +335,8 @@ def main():
         key="client_bill_to",
         label_visibility="collapsed",
     )
-    st.markdown("**Client Email**")
+
+    st.markdown('<div class="subheading">Client Email</div>', unsafe_allow_html=True)
     client_email = st.text_input(
         "Client Email",
         value="",
@@ -342,7 +344,8 @@ def main():
         key="client_email",
         label_visibility="collapsed",
     )
-    st.markdown("**Client Phone Number**")
+    
+    st.markdown('<div class="subheading">Client Phone Number</div>', unsafe_allow_html=True)
     client_phone = st.text_input(
         "Client Phone Number",
         value="",
@@ -350,7 +353,8 @@ def main():
         key="client_phone",
         label_visibility="collapsed",
     )
-    st.markdown("**Client Address (max 65 characters)**")
+
+    st.markdown('<div class="subheading">Client Address (max 65 characters)</div>', unsafe_allow_html=True)
     client_address = st.text_input(
         "Client Address (max 65 characters)",
         value="",
@@ -361,24 +365,28 @@ def main():
     )
 
     # ── NEW: Payment Method Section ──
-    st.markdown("### Payment Method")
+    st.markdown('<div class="heading">Payment Method</div>', unsafe_allow_html=True)
     if "payment_method" not in st.session_state:
         st.session_state["payment_method"] = "Cash"
-
+    
+    st.markdown('<div class="subheading">Select Payment Method:</div>', unsafe_allow_html=True)
     payment_method = st.radio(
         "Select Payment Method:",
         options=["Cash", "NEFT / IMPS", "UPI", "Cheque"],
         index=0,
         key="payment_method",
+        label_visibility = "collapsed"
     )
 
     # ── NEW: Weight Unit ──
-    st.markdown("### Weight Unit")
+    st.markdown('<div class="heading">Weight Unit</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subheading">Select Weight Unit:</div>', unsafe_allow_html=True)
     weight_unit = st.radio(
         "Select Weight Unit:",
         options=["carats", "gms"],
         index=0,  # Default to carats
         key="weight_unit",
+        label_visibility = "collapsed"
     )
 
     # Initialize session-state rows
@@ -394,53 +402,55 @@ def main():
     # Always use vertical card per line item, with label above each input (responsive & clear)
     for idx in range(len(rows)):
         with st.container():
-            st.markdown(f"**Line Item {idx+1}**")
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("No. (positive integer)")
-            with c2:
-                # Autofill No. as idx+1 if empty, else use existing value
-                default_no = rows[idx]["No."] if rows[idx]["No."] else str(idx + 1)
-                no_val = st.text_input(
-                    label="No. (positive integer)",
-                    value=default_no,
-                    placeholder=str(idx + 1),
-                    key=f"No_{idx}",
-                    label_visibility="collapsed",
-                )
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Item Description (required)")
-            with c2:
-                desc_val = st.text_input(
-                    label="Item Description (required)",
-                    value=rows[idx]["Item Description"],
-                    placeholder="Diamond Ring, Necklace…",
-                    key=f"Desc_{idx}",
-                    label_visibility="collapsed",
-                )
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Weight  (non-negative)")
-            with c2:
-                weight_val = st.text_input(
-                    label="Weight  (non-negative)",
-                    value=rows[idx]["Weight"],
-                    placeholder="e.g. 1.25",
-                    key=f"Weight_{idx}",
-                    label_visibility="collapsed",
-                )
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Rate (₹) (non-negative)")
-            with c2:
-                rate_val = st.text_input(
-                    label="Rate (₹) (non-negative)",
-                    value=rows[idx]["Rate (₹)"],
-                    placeholder="e.g. 45000",
-                    key=f"Rate_{idx}",
-                    label_visibility="collapsed",
-                )
+            # Card-like background for each line item
+            st.markdown(f'<div class="heading" style="margin-bottom:0.7rem;">Line Item {idx+1}</div>', unsafe_allow_html=True)
+
+            # No.
+            st.markdown('<div class="label-bold">No. (positive integer)</div>', unsafe_allow_html=True)
+            default_no = rows[idx]["No."] if rows[idx]["No."] else str(idx + 1)
+            no_val = st.text_input(
+                label="No. (positive integer)",
+                value=default_no,
+                placeholder=str(idx + 1),
+                key=f"No_{idx}",
+                label_visibility="collapsed",
+                disabled=True,  # Make it read-only
+            )
+            st.markdown("<div style='height: 0.3rem'></div>", unsafe_allow_html=True)
+
+            # Item Description
+            st.markdown('<div class="label-bold">Item Description (required)</div>', unsafe_allow_html=True)
+            desc_val = st.text_input(
+                label="Item Description (required)",
+                value=rows[idx]["Item Description"],
+                placeholder="Diamond Ring, Necklace…",
+                key=f"Desc_{idx}",
+                label_visibility="collapsed",
+            )
+            st.markdown("<div style='height: 0.3rem'></div>", unsafe_allow_html=True)
+
+            # Weight
+            st.markdown('<div class="label-bold">Weight  (non-negative)</div>', unsafe_allow_html=True)
+            weight_val = st.text_input(
+                label="Weight  (non-negative)",
+                value=rows[idx]["Weight"],
+                placeholder="e.g. 1.25",
+                key=f"Weight_{idx}",
+                label_visibility="collapsed",
+            )
+            st.markdown("<div style='height: 0.3rem'></div>", unsafe_allow_html=True)
+
+            # Rate (₹)
+            st.markdown('<div class="label-bold">Rate (₹) (non-negative)</div>', unsafe_allow_html=True)
+            rate_val = st.text_input(
+                label="Rate (₹) (non-negative)",
+                value=rows[idx]["Rate (₹)"],
+                placeholder="e.g. 45000",
+                key=f"Rate_{idx}",
+                label_visibility="collapsed",
+            )
+            st.markdown("<div style='height: 0.3rem'></div>", unsafe_allow_html=True)  # Add spacing after Rate
+
             # --- Auto-calculate Amount ---
             try:
                 w = float(weight_val)
@@ -452,18 +462,16 @@ def main():
             # Always auto-calculate and overwrite Amount (₹)
             amount_val = auto_amount
 
-            c1, c2 = st.columns([1, 5], gap="small")
-            with c1:
-                st.markdown("Amount (₹) (auto-calculated)")
-            with c2:
-                st.text_input(
-                    label="Amount (₹) (auto-calculated)",
-                    value=amount_val,
-                    placeholder=auto_amount,
-                    key=f"Amount_{idx}",
-                    label_visibility="collapsed",
-                    disabled=False,  # Make it read-only
-                )
+            # Amount (₹) (auto-calculated)
+            st.markdown('<div class="label-bold">Amount (₹) (auto-calculated)</div>', unsafe_allow_html=True)
+            st.text_input(
+                label="Amount (₹) (auto-calculated)",
+                value=amount_val,
+                placeholder=auto_amount,
+                key=f"Amount_{idx}",
+                label_visibility="collapsed",
+                disabled=False,  # Make it read-only
+            )
 
             # Save back to session state
             st.session_state.rows[idx]["No."] = no_val

@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
 /* 2. Force every element under .stApp to use Poppins */
-.stApp, 
+.stApp,
 .stApp * {
     font-family: 'Poppins', sans-serif !important;
 }
@@ -34,7 +34,7 @@
     color: #2C2926 !important;
 }
 
-/* 6. Inputs, textareas, radio options (no background for input/select/textarea) */
+/* 6. Generic inputs, textareas, radio options, download-button fonts & colors */
 .stApp input,
 .stApp textarea,
 .stApp select,
@@ -44,6 +44,14 @@
     color: #2C2926 !important;
 }
 
+/* Bold text for radio button options */
+.stApp .stRadio label {
+    font-weight: bold !important;
+    font-size: 1rem !important; /* optional for consistency */
+    color: #2C2926 !important;  /* to match your theme */
+    font-family: 'Poppins', sans-serif !important;
+}
+
 /* 7. (Optional) If you use sliders, checkboxes, etc., force their labels too */
 .stApp .stCheckbox > div[role='checkbox'] label,
 .stApp .stSlider > div[role='slider'] + label {
@@ -51,8 +59,7 @@
     color: #2C2926 !important;
 }
 
-
-/* Apply background image to the main content area */
+/* 8. Apply background image to the main content area */
 [data-testid="stAppViewContainer"] {
     background-image: url("https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/background-image.gif");
     background-size: cover;
@@ -63,36 +70,39 @@
     padding: 2rem; /* Adjust padding as needed */
 }
 
-/* Make the header transparent to reveal the background */
+/* 9. Make the header transparent to reveal the background */
 [data-testid="stHeader"] {
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* Optional: Adjust the main content's background for readability */
+/* 10. Adjust the main content's background for readability */
 [data-testid="stAppViewContainer"] > div {
     background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white */
     padding: 1rem;
     border-radius: 8px;
 }
 
-.stButton > button, .stDownloadButton > button {
+/* 11. Button styling (primary buttons and download buttons) */
+.stButton > button,
+.stDownloadButton > button {
     background: linear-gradient(90deg, #DA9B49 0%, #F3E38A) !important;
     color: #2C2926 !important;
     border: none !important;
     border-radius: 8px !important;
     font-family: 'Poppins', sans-serif !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
+    font-size: 17px !important;
+    font-weight: 900 !important;
     padding: 0.5em 2em !important;
     box-shadow: 0 2px 8px rgba(218,155,73,0.10);
     transition: 0.2s;
 }
-.stButton > button:hover, .stDownloadButton > button:hover {
+.stButton > button:hover,
+.stDownloadButton > button:hover {
     filter: brightness(0.95);
     box-shadow: 0 4px 16px rgba(218,155,73,0.25);
 }
 
-/* Gradient background for text input, textarea, and select boxes */
+/* 12. Gradient background for text input, textarea, and select boxes */
 .stApp input[type="text"],
 .stApp textarea,
 .stApp select {
@@ -107,11 +117,59 @@
     transition: border 0.2s, box-shadow 0.2s;
 }
 
-/* Optional: On focus, make border more prominent */
+/* 13. On-focus state for inputs, textarea, select */
 .stApp input[type="text"]:focus,
 .stApp textarea:focus,
 .stApp select:focus {
     border: 2px solid #DA9B49 !important;
     outline: none !important;
     box-shadow: 0 2px 8px rgba(218,155,73,0.15);
+}
+
+/* 14. Date picker styling */
+.stApp .stDateInput input {
+    background: linear-gradient(90deg, #fffbe7 0%, #f7f6ef 100%) !important;
+    border: 1.5px solid #e2c98a !important;
+    border-radius: 6px !important;
+    color: #2C2926 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+
+/* ───────────── Custom Bold Classes for Headings, Subheadings, Labels ───────────── */
+
+/* 15. Heading */
+.heading {
+    font-weight: bold;
+    font-size: 1.35rem;
+    color: #232323;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
+}
+
+/* 16. Subheading */
+.subheading {
+    font-weight: bold;
+    font-size: 1.12rem;
+    color: #444444;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.01em;
+}
+
+/* 17. Label (for small field labels) */
+.label-bold {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #666666;
+    margin-bottom: 0.15rem;
+    letter-spacing: 0.01em;
+}
+/* Force radio option labels to be bold */
+/* Bold text for radio button options */
+div[data-baseweb="radio"] > div {
+    font-weight: bold !important;
+    color: #2C2926 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 1rem !important;
 }
