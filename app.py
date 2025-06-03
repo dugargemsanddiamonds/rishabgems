@@ -378,17 +378,6 @@ def main():
         label_visibility = "collapsed"
     )
 
-    # ── NEW: Weight Unit ──
-    st.markdown('<div class="heading">Weight Unit</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subheading">Select Weight Unit:</div>', unsafe_allow_html=True)
-    weight_unit = st.radio(
-        "Select Weight Unit:",
-        options=["carats", "gms"],
-        index=0,  # Default to carats
-        key="weight_unit",
-        label_visibility = "collapsed"
-    )
-
     # Initialize session-state rows
     if "rows" not in st.session_state:
         st.session_state.rows = [
@@ -429,12 +418,26 @@ def main():
             )
             st.markdown("<div style='height: 0.3rem'></div>", unsafe_allow_html=True)
 
-            # Weight
-            st.markdown('<div class="label-bold">Weight  (non-negative)</div>', unsafe_allow_html=True)
+            # Per-row Weight Unit
+            prev_unit = rows[idx-1]["Weight Unit"] if idx > 0 and "Weight Unit" in rows[idx-1] else "carats"
+            st.markdown('<div class="label-bold">Weight Unit</div>', unsafe_allow_html=True)
+            weight_unit = st.radio(
+                f"Select Weight Unit for Row {idx+1}:",
+                options=["carats", "gms"],
+                index=0 if rows[idx].get("Weight Unit", prev_unit) == "carats" else 1,
+                key=f"weight_unit_{idx}",
+                label_visibility="collapsed",
+                horizontal=True,
+            )
+            # Save the selected unit for this row
+            rows[idx]["Weight Unit"] = weight_unit
+
+            # Weight input (show unit)
+            st.markdown(f'<div class="label-bold">Weight ({weight_unit}, non-negative)</div>', unsafe_allow_html=True)
             weight_val = st.text_input(
-                label="Weight  (non-negative)",
+                label=f"Weight ({weight_unit}, non-negative)",
                 value=rows[idx]["Weight"],
-                placeholder="e.g. 1.25",
+                placeholder=f"e.g. 1.25",
                 key=f"Weight_{idx}",
                 label_visibility="collapsed",
             )
@@ -479,6 +482,7 @@ def main():
             st.session_state.rows[idx]["Weight"] = weight_val
             st.session_state.rows[idx]["Rate (₹)"] = rate_val
             st.session_state.rows[idx]["Amount (₹)"] = amount_val
+            st.session_state.rows[idx]["Weight Unit"] = weight_unit
 
     st.markdown("---")
 
@@ -566,7 +570,7 @@ def main():
                     {
                         "No.": str(int(parse_number(r["No."]))),
                         "Item Description": r["Item Description"].strip(),
-                        "Weight": f"{parse_number(r['Weight']):.2f} {weight_unit}",
+                        "Weight": f"{parse_number(r['Weight']):.2f} {r['Weight Unit']}",
                         "Rate (₹)": f"{parse_number(r['Rate (₹)']):.2f}",
                         "Amount (₹)": f"{amt:.2f}",
                     }
