@@ -5,3 +5,5 @@ openpyxl
 matplotlib
 pandas
 numpy
+google-auth
+google-api-python-client
