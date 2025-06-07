@@ -1,0 +1,23 @@
+[theme]
+base="light"
+primaryColor="#DA9B49"
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#F0F2F6"
+textColor="#2C2926"
+font="sans serif"
+
+[server]
+headless = true
+fileWatcherType = "poll"
+enableStaticServing = true
+enableWebsocketCompression = true
+
+[runner]
+fastReruns = true
+enforceSerializableSessionState = false
+magicEnabled = true
+enumCoercion = "nameOnly"
+
+[client]
+showErrorDetails = "stacktrace"
+toolbarMode = "minimal"
