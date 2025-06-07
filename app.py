@@ -11,6 +11,12 @@ page_element="""
 [data-testid="stHeader"] {
   background-color: rgba(0,0,0,0);
 }
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+div._link_gzau3_10 {
+    display: none !important;
+}
 </style>
 """
 st.markdown(page_element, unsafe_allow_html=True)
