@@ -17,9 +17,29 @@ header {visibility: hidden;}
 div._link_gzau3_10 {
     display: none !important;
 }
+.st-emotion-cache-1cpx1b6 a {display: none;}
+.st-emotion-cache-1vze3mj {display: none;}
 </style>
 """
 st.markdown(page_element, unsafe_allow_html=True)
+
+hide_elements_style = """
+<style>
+/* Hide profile container */
+div._profileContainer_gzau3_53 {
+    display: none !important;
+}
+
+/* Hide 'Hosted with Streamlit' footer */
+a._container_gzau3_1._viewerBadge_nim44_23 {
+    display: none !important;
+}
+</style>
+"""
+
+st.markdown(hide_elements_style, unsafe_allow_html=True)
+
+
 import pandas as pd
 from io import BytesIO
 from pptx import Presentation
