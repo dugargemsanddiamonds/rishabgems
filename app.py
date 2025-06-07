@@ -332,39 +332,7 @@ def main():
             label_visibility="collapsed",  # Hides it visually
             help="Enter your 6-digit PIN",
         )
-        # Custom Login Button
-        login_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/main/login-diamond.png"
-        login_button_html = f"""
-        <div style="display:flex;justify-content:center;">
-            <button class="golden-button" id="custom-login-btn" type="button" style="margin-top:1em;">
-                <img src="{login_img_url}" alt="Login" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
-                Login
-            </button>
-        </div>
-        <script>
-        const loginBtn = window.parent.document.getElementById("custom-login-btn");
-        if (loginBtn) {{
-            loginBtn.onclick = function() {{
-                window.parent.postMessage({{isLoginClicked: true}}, "*");
-            }};
-        }}
-        </script>
-        """
-        st.markdown(login_button_html, unsafe_allow_html=True)
-        # Listen for JS event and trigger rerun if login is clicked
-        if "login_clicked" not in st.session_state:
-            st.session_state["login_clicked"] = False
-        st.markdown("""
-        <script>
-        window.addEventListener("message", (event) => {
-            if (event.data && event.data.isLoginClicked) {
-                window.parent.streamlitSend({type: "rerunScript"});
-            }
-        });
-        </script>
-        """, unsafe_allow_html=True)
-        # Check login on rerun
-        if st.session_state.get("login_clicked") or st.button("hidden_login", key="hidden_login", label_visibility="collapsed"):
+        if st.button("**💠Login**", use_container_width=True):
             if pin == CORRECT_PIN:
                 st.session_state["authenticated"] = True
                 st.rerun()
@@ -586,39 +554,7 @@ def main():
     # Centered, stacked buttons
     center_col = st.columns([3, 2, 3])[1]
     with center_col:
-        # Custom Add Another Row Button
-        add_row_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/main/add-row-diamond.png"
-        add_row_button_html = f"""
-        <div style="display:flex;justify-content:center;">
-            <button class="golden-button" id="custom-add-row-btn" type="button">
-                <img src="{add_row_img_url}" alt="Add" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
-                Add Another Row
-            </button>
-        </div>
-        <script>
-        const addRowBtn = window.parent.document.getElementById("custom-add-row-btn");
-        if (addRowBtn) {{
-            addRowBtn.onclick = function() {{
-                window.parent.postMessage({{isAddRowClicked: true}}, "*");
-            }};
-        }}
-        </script>
-        """
-        st.markdown(add_row_button_html, unsafe_allow_html=True)
-        # Listen for JS event and trigger rerun if add row is clicked
-        if "add_row_clicked" not in st.session_state:
-            st.session_state["add_row_clicked"] = False
-        st.markdown("""
-        <script>
-        window.addEventListener("message", (event) => {
-            if (event.data && event.data.isAddRowClicked) {
-                window.parent.streamlitSend({type: "rerunScript"});
-            }
-        });
-        </script>
-        """, unsafe_allow_html=True)
-        # Check add row on rerun
-        if st.session_state.get("add_row_clicked") or st.button("hidden_add_row", key="hidden_add_row", label_visibility="collapsed"):
+        if st.button("**➕ Add Another Row**", use_container_width=True):
             st.session_state.rows.append(
                 {
                     "No.": "",
@@ -630,40 +566,7 @@ def main():
             )
             st.rerun()
         st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)  # Small vertical gap
-
-        # Custom Generate Invoice Button
-        generate_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/main/generate-invoice-diamond.png"
-        generate_button_html = f"""
-        <div style="display:flex;justify-content:center;">
-            <button class="golden-button" id="custom-generate-btn" type="button">
-                <img src="{generate_img_url}" alt="Generate" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
-                Generate Invoice
-            </button>
-        </div>
-        <script>
-        const generateBtn = window.parent.document.getElementById("custom-generate-btn");
-        if (generateBtn) {{
-            generateBtn.onclick = function() {{
-                window.parent.postMessage({{isGenerateClicked: true}}, "*");
-            }};
-        }}
-        </script>
-        """
-        st.markdown(generate_button_html, unsafe_allow_html=True)
-        # Listen for JS event and trigger rerun if generate is clicked
-        if "generate_clicked" not in st.session_state:
-            st.session_state["generate_clicked"] = False
-        st.markdown("""
-        <script>
-        window.addEventListener("message", (event) => {
-            if (event.data && event.data.isGenerateClicked) {
-                window.parent.streamlitSend({type: "rerunScript"});
-            }
-        });
-        </script>
-        """, unsafe_allow_html=True)
-        # Check generate on rerun
-        generate_button = st.session_state.get("generate_clicked") or st.button("hidden_generate", key="hidden_generate", label_visibility="collapsed")
+        generate_button = st.button("**🖨️ Generate Invoice**", use_container_width=True)
 
     # When “Generate Invoice” is clicked:
     if generate_button:
@@ -865,7 +768,7 @@ def main():
 
         if b64_pdf:
             # Use your preferred image URL here
-            loading_placeholder.empty()  # Remove GIF
+            loading_placeholder.empty()  # Remove GIF 
             share_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png"
             custom_button = f"""
             <a href="data:application/pdf;base64,{b64_pdf}" download="{st.session_state['pdf_filename']}" class="golden-button" id="sharepdfbtn">
