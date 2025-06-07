@@ -24,6 +24,10 @@ from datetime import datetime, timedelta
 import time
 import importlib.util
 
+# app.py
+import drive
+
+
 # Import num2words from number-to-words.py
 from number_to_words import num2words
 
@@ -81,10 +85,10 @@ def generate_filled_invoice(rows, template_path, bill_info, payment_method, amou
 
     # Handle Payment Method Checkboxes
     checkbox_names = {
-        "Cash": "Cash Check",
-        "NEFT / IMPS": "NEFT Check",
-        "UPI": "UPI Check",
-        "Cheque": "Cheque Check",
+        "**Cash**": "Cash Check",
+        "**NEFT / IMPS**": "NEFT Check",
+        "**UPI**": "UPI Check",
+        "**Cheque**": "Cheque Check",
     }
     for shape in slide.shapes:
         if shape.has_text_frame:
@@ -269,7 +273,7 @@ def main():
             label_visibility="collapsed",  # Hides it visually
             help="Enter your 6-digit PIN",
         )
-        if st.button("Login", use_container_width=True):
+        if st.button("**💠Login**", use_container_width=True):
             if pin == CORRECT_PIN:
                 st.session_state["authenticated"] = True
                 st.rerun()
@@ -367,12 +371,12 @@ def main():
     # ── NEW: Payment Method Section ──
     st.markdown('<div class="heading">Payment Method</div>', unsafe_allow_html=True)
     if "payment_method" not in st.session_state:
-        st.session_state["payment_method"] = "Cash"
+        st.session_state["payment_method"] = "**Cash**"
     
     st.markdown('<div class="subheading">Select Payment Method:</div>', unsafe_allow_html=True)
     payment_method = st.radio(
         "Select Payment Method:",
-        options=["Cash", "NEFT / IMPS", "UPI", "Cheque"],
+        options=["**Cash**", "**NEFT / IMPS**", "**UPI**", "**Cheque**"],
         index=0,
         key="payment_method",
         label_visibility = "collapsed"
@@ -489,7 +493,7 @@ def main():
     # Centered, stacked buttons
     center_col = st.columns([3, 2, 3])[1]
     with center_col:
-        if st.button("➕ Add Another Row"):
+        if st.button("**➕ Add Another Row**", use_container_width=True):
             st.session_state.rows.append(
                 {
                     "No.": "",
@@ -501,7 +505,7 @@ def main():
             )
             st.rerun()
         st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)  # Small vertical gap
-        generate_button = st.button("🖨️ Generate Invoice")
+        generate_button = st.button("**🖨️ Generate Invoice**", use_container_width=True)
 
     # When “Generate Invoice” is clicked:
     if generate_button:
@@ -622,7 +626,7 @@ def main():
             return
 
         # Generate a dynamic filename
-        filename = f"RishabGems_{bill_no}_{client_bill_to}_{client_phone}_{today.strftime('%Y%m%d')}.pptx"
+        filename = f"Rishab_Gems_{client_bill_to}_{bill_no}_{client_phone}_{today.strftime('%Y%m%d')}.pptx"
         filename = re.sub(r'[\\/*?:"<>|]', "", filename)  # Remove invalid characters for filenames
 
         # 5) Download button for PPTX
@@ -634,6 +638,17 @@ def main():
                 file_name=filename,
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
             )
+
+        # ← NEW: Upload to Drive
+        folder_id = drive.get_folder_id("Tax Invoice")
+        if folder_id:
+            try:
+                fid = drive.upload_bytes_to_drive(pptx_bytes, filename, folder_id)
+                st.success(f"✅ Also uploaded to Drive (File ID: {fid})")
+            except Exception as e:
+                st.error(f"⚠️ Upload to Drive failed: {e}")
+        else:
+            st.error("⚠️ 'Tax Invoice' folder not found in Drive. Share it with your service account and retry.")
 
 
 if __name__ == "__main__":

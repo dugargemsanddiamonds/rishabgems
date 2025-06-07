@@ -173,3 +173,109 @@ div[data-baseweb="radio"] > div {
     font-family: 'Poppins', sans-serif !important;
     font-size: 1rem !important;
 }
+
+/* override BaseWeb radio-list wrapper */
+div[data-baseweb="radio"] > div[role="radiogroup"] label {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: bold           !important;
+  font-size:    1rem          !important;
+  color:        #2C2926       !important;
+}
+/* override the little circle when selected */
+div[data-baseweb="radio"] span[role="radio"][aria-checked="true"] {
+  border-color: #DA9B49 !important;
+  background:    #DA9B49 !important;
+}
+
+/* date-picker text input */
+div[data-baseweb="datepicker"] input {
+  font-family: 'Poppins', sans-serif !important;
+  font-size:    15px           !important;
+  font-weight: 500             !important;
+  color:        #2C2926        !important;
+  background:   linear-gradient(90deg, #fffbe7 0%, #f7f6ef 100%) !important;
+  border:       1.5px solid #e2c98a !important;
+  border-radius: 6px !important;
+  box-shadow:    0 1px 4px rgba(218,155,73,0.07) !important;
+}
+
+/* calendar popup header & selected day */
+div[data-baseweb="datepicker"] .react-datepicker__current-month,
+div[data-baseweb="datepicker"] .react-datepicker__day--selected {
+  color:       #2C2926   !important;
+  background:  #DA9B49   !important;
+}
+
+/* Golden gradient button with bold centered text and click effect */
+.golden-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(90deg, #DA9B49 0%, #F3E38A) !important;
+    color: #2C2926 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 900 !important;
+    padding: 0.5em 2em !important;
+    box-shadow: 0 2px 8px rgba(218,155,73,0.10);
+    transition: background 0.2s, box-shadow 0.2s, filter 0.2s;
+    text-decoration: none !important;
+    text-align: center;
+}
+
+.golden-button:hover {
+    box-shadow: 0 4px 12px rgba(218,155,73,0.25);
+    filter: brightness(0.97);
+    color: #2C2926 !important;
+    text-decoration: none !important;
+}
+
+.golden-button:active {
+    background: linear-gradient(90deg, #C6892F 0%, #E6D06B 100%) !important;
+    filter: brightness(0.93);
+    box-shadow: 0 2px 4px rgba(218,155,73,0.18);
+}
+
+.golden-button img {
+    margin-right: 0.5rem;
+}
+
+/* Streamlit button override for golden style, bold centered text, and click effect */
+.stButton > button,
+.stDownloadButton > button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(90deg, #DA9B49 0%, #F3E38A) !important;
+    color: #2C2926 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 900 !important;
+    padding: 0.5em 2em !important;
+    box-shadow: 0 2px 8px rgba(218,155,73,0.10);
+    transition: background 0.2s, box-shadow 0.2s, filter 0.2s;
+    text-align: center;
+}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover {
+    box-shadow: 0 4px 12px rgba(218,155,73,0.25);
+    filter: brightness(0.97);
+    color: #2C2926 !important;
+}
+
+.stButton > button:active,
+.stDownloadButton > button:active {
+    background: linear-gradient(90deg, #C6892F 0%, #E6D06B 100%) !important;
+    filter: brightness(0.93);
+    box-shadow: 0 2px 4px rgba(218,155,73,0.18);
+}
+
+/* Bold radio option labels */
+.stApp [data-baseweb="radio"] label span {
+    font-weight: bold !important;
+}
