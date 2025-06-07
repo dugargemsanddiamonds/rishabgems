@@ -308,7 +308,17 @@ def main():
     # --- Minimalistic Login ---
     CORRECT_PIN = st.secrets.get("login_pin", "123456")
     if not st.session_state.get("authenticated"):
-                # Centered logo above login
+        # Centered logo above login
+        
+        st.markdown(
+            """
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
+            <img src="https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/Diamond_videos_1001.gif" width="300" style="border-radius:12px; box-shadow:0 2px 8px 0 rgba(0,0,0,0.06);" />
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         st.markdown(
             """
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
@@ -332,12 +342,23 @@ def main():
             label_visibility="collapsed",  # Hides it visually
             help="Enter your 6-digit PIN",
         )
+
         if st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/diamond.gif) **Login**", use_container_width=True):
             if pin == CORRECT_PIN:
                 st.session_state["authenticated"] = True
                 st.rerun()
             else:
                 st.error("Incorrect PIN. Please try again.")
+
+        # Display two gifs after the Login button
+        st.markdown(
+            """
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
+            <img src="https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/Diamond_Videos_1003.gif" width="300" style="border-radius:12px; box-shadow:0 2px 8px 0 rgba(0,0,0,0.06);" />
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         return  # Stop here if not authenticated
 
     # --- Your existing app code below ---
@@ -554,7 +575,7 @@ def main():
     # Centered, stacked buttons
     center_col = st.columns([3, 2, 3])[1]
     with center_col:
-        if st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png) **Add Another Row**", use_container_width=True):
+        if st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/diamond-1.gif) **Add Another Row**", use_container_width=True):
             st.session_state.rows.append(
                 {
                     "No.": "",
@@ -566,7 +587,7 @@ def main():
             )
             st.rerun()
         st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)  # Small vertical gap
-        generate_button = st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png) **Generate Invoice**", use_container_width=True)
+        generate_button = st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/diamond-1.gif) **Generate Invoice**", use_container_width=True)
 
     # When “Generate Invoice” is clicked:
     if generate_button:
@@ -769,7 +790,7 @@ def main():
         if b64_pdf:
             # Use your preferred image URL here
             loading_placeholder.empty()  # Remove GIF 
-            share_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png"
+            share_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/diamond-pink-2.gif"
             custom_button = f"""
             <a href="data:application/pdf;base64,{b64_pdf}" download="{st.session_state['pdf_filename']}" class="golden-button" id="sharepdfbtn">
                 <img src="{share_img_url}" alt="Share" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
