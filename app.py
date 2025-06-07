@@ -2,7 +2,7 @@
 
 import streamlit as st
 st.set_page_config(
-    page_title="Rishab Gems 💎",
+    page_title="Rishab Gems",
     page_icon="diamond.ico",
     layout="centered",
 )
@@ -42,30 +42,30 @@ st.markdown(hide_elements_style, unsafe_allow_html=True)
 hide_streamlit_style = """
                 <style>
                 div[data-testid="stToolbar"] {
-                visibility: hidden;
+                visibility: hidden !important;
                 height: 0%;
                 position: fixed;
                 }
                 div[data-testid="stDecoration"] {
-                visibility: hidden;
+                visibility: hidden !important;
                 height: 0%;
                 position: fixed;
                 }
                 div[data-testid="stStatusWidget"] {
-                visibility: hidden;
+                visibility: hidden !important;
                 height: 0%;
                 position: fixed;
                 }
                 #MainMenu {
-                visibility: hidden;
+                visibility: hidden !important;
                 height: 0%;
                 }
                 header {
-                visibility: hidden;
+                visibility: hidden !important;
                 height: 0%;
                 }
                 footer {
-                visibility: hidden;
+                visibility: hidden !important;
                 height: 0%;
                 }
                 </style>
