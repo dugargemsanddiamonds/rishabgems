@@ -332,7 +332,7 @@ def main():
             label_visibility="collapsed",  # Hides it visually
             help="Enter your 6-digit PIN",
         )
-        if st.button("**💠Login**", use_container_width=True):
+        if st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/diamond.gif) **Login**", use_container_width=True):
             if pin == CORRECT_PIN:
                 st.session_state["authenticated"] = True
                 st.rerun()
@@ -554,7 +554,7 @@ def main():
     # Centered, stacked buttons
     center_col = st.columns([3, 2, 3])[1]
     with center_col:
-        if st.button("**➕ Add Another Row**", use_container_width=True):
+        if st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png) **Add Another Row**", use_container_width=True):
             st.session_state.rows.append(
                 {
                     "No.": "",
@@ -566,7 +566,7 @@ def main():
             )
             st.rerun()
         st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)  # Small vertical gap
-        generate_button = st.button("**🖨️ Generate Invoice**", use_container_width=True)
+        generate_button = st.button("![icon](https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png) **Generate Invoice**", use_container_width=True)
 
     # When “Generate Invoice” is clicked:
     if generate_button:
