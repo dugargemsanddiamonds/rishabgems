@@ -44,3 +44,30 @@ def upload_bytes_to_drive(
         body=metadata, media_body=media, fields="id"
     ).execute()
     return file["id"]
+
+def export_drive_file_as_pdf(file_id: str) -> bytes:
+    """
+    Export a Google Slides file as PDF and return the PDF bytes.
+    """
+    request = _drive_service.files().export_media(
+        fileId=file_id,
+        mimeType="application/pdf"
+    )
+    pdf_bytes = request.execute()
+    return pdf_bytes
+
+def convert_pptx_to_slides(file_id, filename, folder_id):
+    """
+    Converts an uploaded PPTX file in Drive to a Google Slides file.
+    Returns the new Google Slides file ID.
+    """
+    body = {
+        'name': filename.replace('.pptx', ''),
+        'mimeType': 'application/vnd.google-apps.presentation',
+        'parents': [folder_id],
+    }
+    slides_file = _drive_service.files().copy(
+        fileId=file_id,
+        body=body
+    ).execute()
+    return slides_file['id']

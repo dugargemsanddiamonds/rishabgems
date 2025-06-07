@@ -39,6 +39,39 @@ a._container_gzau3_1._viewerBadge_nim44_23 {
 
 st.markdown(hide_elements_style, unsafe_allow_html=True)
 
+hide_streamlit_style = """
+                <style>
+                div[data-testid="stToolbar"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+                }
+                div[data-testid="stDecoration"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+                }
+                div[data-testid="stStatusWidget"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+                }
+                #MainMenu {
+                visibility: hidden;
+                height: 0%;
+                }
+                header {
+                visibility: hidden;
+                height: 0%;
+                }
+                footer {
+                visibility: hidden;
+                height: 0%;
+                }
+                </style>
+                """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 import pandas as pd
 from io import BytesIO
@@ -299,7 +332,39 @@ def main():
             label_visibility="collapsed",  # Hides it visually
             help="Enter your 6-digit PIN",
         )
-        if st.button("**💠Login**", use_container_width=True):
+        # Custom Login Button
+        login_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/main/login-diamond.png"
+        login_button_html = f"""
+        <div style="display:flex;justify-content:center;">
+            <button class="golden-button" id="custom-login-btn" type="button" style="margin-top:1em;">
+                <img src="{login_img_url}" alt="Login" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
+                Login
+            </button>
+        </div>
+        <script>
+        const loginBtn = window.parent.document.getElementById("custom-login-btn");
+        if (loginBtn) {{
+            loginBtn.onclick = function() {{
+                window.parent.postMessage({{isLoginClicked: true}}, "*");
+            }};
+        }}
+        </script>
+        """
+        st.markdown(login_button_html, unsafe_allow_html=True)
+        # Listen for JS event and trigger rerun if login is clicked
+        if "login_clicked" not in st.session_state:
+            st.session_state["login_clicked"] = False
+        st.markdown("""
+        <script>
+        window.addEventListener("message", (event) => {
+            if (event.data && event.data.isLoginClicked) {
+                window.parent.streamlitSend({type: "rerunScript"});
+            }
+        });
+        </script>
+        """, unsafe_allow_html=True)
+        # Check login on rerun
+        if st.session_state.get("login_clicked") or st.button("hidden_login", key="hidden_login", label_visibility="collapsed"):
             if pin == CORRECT_PIN:
                 st.session_state["authenticated"] = True
                 st.rerun()
@@ -449,17 +514,19 @@ def main():
             st.markdown("<div style='height: 0.3rem'></div>", unsafe_allow_html=True)
 
             # Per-row Weight Unit
-            prev_unit = rows[idx-1]["Weight Unit"] if idx > 0 and "Weight Unit" in rows[idx-1] else "carats"
+            prev_unit = rows[idx-1]["Weight Unit"] if idx > 0 and "Weight Unit" in rows[idx-1] else "**carats**"
             st.markdown('<div class="label-bold">Weight Unit</div>', unsafe_allow_html=True)
             weight_unit = st.radio(
                 f"Select Weight Unit for Row {idx+1}:",
-                options=["carats", "gms"],
-                index=0 if rows[idx].get("Weight Unit", prev_unit) == "carats" else 1,
+                options=["**carats**", "**gms**"],
+                index=0 if rows[idx].get("Weight Unit", prev_unit).replace("**", "") == "carats" else 1,
                 key=f"weight_unit_{idx}",
                 label_visibility="collapsed",
                 horizontal=True,
             )
             # Save the selected unit for this row
+            # Remove ** from weight unit for storage
+            weight_unit = weight_unit.replace("**", "")
             rows[idx]["Weight Unit"] = weight_unit
 
             # Weight input (show unit)
@@ -519,7 +586,39 @@ def main():
     # Centered, stacked buttons
     center_col = st.columns([3, 2, 3])[1]
     with center_col:
-        if st.button("**➕ Add Another Row**", use_container_width=True):
+        # Custom Add Another Row Button
+        add_row_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/main/add-row-diamond.png"
+        add_row_button_html = f"""
+        <div style="display:flex;justify-content:center;">
+            <button class="golden-button" id="custom-add-row-btn" type="button">
+                <img src="{add_row_img_url}" alt="Add" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
+                Add Another Row
+            </button>
+        </div>
+        <script>
+        const addRowBtn = window.parent.document.getElementById("custom-add-row-btn");
+        if (addRowBtn) {{
+            addRowBtn.onclick = function() {{
+                window.parent.postMessage({{isAddRowClicked: true}}, "*");
+            }};
+        }}
+        </script>
+        """
+        st.markdown(add_row_button_html, unsafe_allow_html=True)
+        # Listen for JS event and trigger rerun if add row is clicked
+        if "add_row_clicked" not in st.session_state:
+            st.session_state["add_row_clicked"] = False
+        st.markdown("""
+        <script>
+        window.addEventListener("message", (event) => {
+            if (event.data && event.data.isAddRowClicked) {
+                window.parent.streamlitSend({type: "rerunScript"});
+            }
+        });
+        </script>
+        """, unsafe_allow_html=True)
+        # Check add row on rerun
+        if st.session_state.get("add_row_clicked") or st.button("hidden_add_row", key="hidden_add_row", label_visibility="collapsed"):
             st.session_state.rows.append(
                 {
                     "No.": "",
@@ -531,7 +630,40 @@ def main():
             )
             st.rerun()
         st.markdown("<div style='height: 0.5rem'></div>", unsafe_allow_html=True)  # Small vertical gap
-        generate_button = st.button("**🖨️ Generate Invoice**", use_container_width=True)
+
+        # Custom Generate Invoice Button
+        generate_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/main/generate-invoice-diamond.png"
+        generate_button_html = f"""
+        <div style="display:flex;justify-content:center;">
+            <button class="golden-button" id="custom-generate-btn" type="button">
+                <img src="{generate_img_url}" alt="Generate" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
+                Generate Invoice
+            </button>
+        </div>
+        <script>
+        const generateBtn = window.parent.document.getElementById("custom-generate-btn");
+        if (generateBtn) {{
+            generateBtn.onclick = function() {{
+                window.parent.postMessage({{isGenerateClicked: true}}, "*");
+            }};
+        }}
+        </script>
+        """
+        st.markdown(generate_button_html, unsafe_allow_html=True)
+        # Listen for JS event and trigger rerun if generate is clicked
+        if "generate_clicked" not in st.session_state:
+            st.session_state["generate_clicked"] = False
+        st.markdown("""
+        <script>
+        window.addEventListener("message", (event) => {
+            if (event.data && event.data.isGenerateClicked) {
+                window.parent.streamlitSend({type: "rerunScript"});
+            }
+        });
+        </script>
+        """, unsafe_allow_html=True)
+        # Check generate on rerun
+        generate_button = st.session_state.get("generate_clicked") or st.button("hidden_generate", key="hidden_generate", label_visibility="collapsed")
 
     # When “Generate Invoice” is clicked:
     if generate_button:
@@ -636,11 +768,13 @@ def main():
         amount_in_words = "Rupees " + num2words(net_payable) + " Only."
 
         # Show Amount In Words textbox in UI (editable)
+        st.markdown('<div class="subheading">Amount In Words</div>', unsafe_allow_html=True)
         amount_in_words = st.text_input(
             "Amount In Words",
             value=amount_in_words,
             key="amount_in_words",
             help="Amount in words for the invoice. You can edit if needed.",
+            label_visibility="collapsed",
         )
 
         try:
@@ -651,31 +785,109 @@ def main():
             st.error(f"Unexpected error during PPT generation: {e}")
             return
 
-        # Generate a dynamic filename
         filename = f"Rishab_Gems_{client_bill_to}_{bill_no}_{client_phone}_{today.strftime('%Y%m%d')}.pptx"
-        filename = re.sub(r'[\\/*?:"<>|]', "", filename)  # Remove invalid characters for filenames
+        filename = re.sub(r'[\\/*?:"<>|]', "", filename)
 
-        # 5) Download button for PPTX
-        if pptx_bytes:
-            st.success("✅ Invoice generated successfully.")
-            st.download_button(
-                label="📥 Download Filled PPTX",
-                data=pptx_bytes,
-                file_name=filename,
-                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            )
+        # Store in session state for use after rerun
+        st.session_state["pptx_bytes"] = pptx_bytes
+        st.session_state["pptx_filename"] = filename
 
         # ← NEW: Upload to Drive
+        import traceback  # Add at the top of your file if not already imported
+
+        print("Attempting to get folder ID for 'Tax Invoice'...")  # Debug
         folder_id = drive.get_folder_id("Tax Invoice")
+        print(f"Folder ID: {folder_id}")  # Debug
+
+        pptx_drive_fid = None
+        pdf_drive_fid = None
+        pdf_bytes = None
+        pdf_filename = filename.replace(".pptx", ".pdf")
+
         if folder_id:
             try:
-                fid = drive.upload_bytes_to_drive(pptx_bytes, filename, folder_id)
-                st.success(f"✅ Also uploaded to Drive (File ID: {fid})")
+                # Show loading GIF before upload
+                loading_gif_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/rotating-ring.webp"
+                loading_placeholder = st.empty()
+                loading_placeholder.markdown(
+                    f'<div style="display:flex;justify-content:center;"><img src="{loading_gif_url}" alt="Loading..." style="height:400px;" /></div>',
+                    unsafe_allow_html=True
+                )
+                print("Uploading PPTX to Drive...")  # Debug
+                pptx_drive_fid = drive.upload_bytes_to_drive(
+                    pptx_bytes,
+                    filename,
+                    folder_id,
+                )
+                print(f"Upload returned File ID: {pptx_drive_fid}")  # Debug
+                st.success(f"✅ PPTX uploaded to Drive (File ID: {pptx_drive_fid})")
+                try:
+                    # Show loading GIF before conversion
+                    print("Converting PPTX to Google Slides...")  # Debug
+                    slides_fid = drive.convert_pptx_to_slides(pptx_drive_fid, filename, folder_id)
+                    print(f"Converted to Google Slides File ID: {slides_fid}")  # Debug
+
+                    print("Attempting to export as PDF...")  # Debug
+                    pdf_bytes = drive.export_drive_file_as_pdf(slides_fid)
+                    print("PDF export successful")  # Debug
+                    st.session_state["pdf_bytes"] = pdf_bytes
+                    st.session_state["pdf_filename"] = pdf_filename
+                    # Upload PDF to Drive
+                    pdf_drive_fid = drive.upload_bytes_to_drive(
+                        pdf_bytes,
+                        pdf_filename,
+                        folder_id,
+                        mime_type="application/pdf"
+                    )
+                    st.success(f"✅ PDF uploaded to Drive (File ID: {pdf_drive_fid})")
+                except Exception as e:
+                    loading_placeholder.empty()
+                    st.error(f"Could not export as PDF: {e}")
+                    st.write(traceback.format_exc())  # Print full traceback
             except Exception as e:
+                loading_placeholder.empty()
                 st.error(f"⚠️ Upload to Drive failed: {e}")
+                st.write(traceback.format_exc())  # Print full traceback
         else:
             st.error("⚠️ 'Tax Invoice' folder not found in Drive. Share it with your service account and retry.")
 
+    # Show the Share as PDF button if PDF is available (in place of Download PPTX)
+    if "pdf_bytes" in st.session_state and "pdf_filename" in st.session_state:
+        # Use custom HTML for better Android compatibility (auto download + share)
+        # Streamlit's download_button does not support triggering the share sheet directly,
+        # but setting download attribute helps with auto-download.
+        b64_pdf = None
+        try:
+            import base64
+            b64_pdf = base64.b64encode(st.session_state["pdf_bytes"]).decode()
+        except Exception:
+            pass
+
+        if b64_pdf:
+            # Use your preferred image URL here
+            loading_placeholder.empty()  # Remove GIF
+            share_img_url = "https://raw.githubusercontent.com/kingrishabdugar/RishabGems/refs/heads/main/pink-diamond.png"
+            custom_button = f"""
+            <a href="data:application/pdf;base64,{b64_pdf}" download="{st.session_state['pdf_filename']}" class="golden-button" id="sharepdfbtn">
+                <img src="{share_img_url}" alt="Share" style="height:1.5em;vertical-align:middle;margin-right:0.5em;" />
+                Share as PDF
+            </a>
+            <script>
+            // Try to auto-click for Android auto-download
+            setTimeout(function() {{
+                var btn = document.getElementById('sharepdfbtn');
+                if(btn) btn.click();
+            }}, 500);
+            </script>
+            """
+            st.markdown(custom_button, unsafe_allow_html=True)
+        else:
+            st.download_button(
+                label="**📤 Share as PDF**",
+                data=st.session_state["pdf_bytes"],
+                file_name=st.session_state["pdf_filename"],
+                mime="application/pdf",
+            )        
 
 if __name__ == "__main__":
     main()
